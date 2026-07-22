@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ConsoleTester/ConsoleTester.csproj" />
+  <Project Path="GenericParserApi/GenericParserApi.csproj" />
+</Solution>
