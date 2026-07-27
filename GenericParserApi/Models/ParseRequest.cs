@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace GenericParserApi.Models
+﻿namespace GenericParserApi.Models
 {
-    internal class ParseRequest
+    public record ParseRequest
     {
+        public ContentType Type { get; init; }
+
+        public string Content { get; init; } = string.Empty;
     }
 }
