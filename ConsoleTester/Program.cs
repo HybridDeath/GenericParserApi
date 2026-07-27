@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
 
@@ -11,20 +12,21 @@ namespace ConsoleTester
             var csv =
             """
                 Imię,Wiek,Stanowisko
-                Żaneta,25,Programistka
+                Żaneta,25,Programistka,IT
                 Adam,23,Menedżer HR
                 Paweł,32,Kierownik działu wdrażającego
             """;
 
             string csvBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(csv));
+            Console.WriteLine("Converted CSV to base64: " + csvBase64);
 
             HttpClient client = new();
 
             Uri localhostUri = new("http://localhost:5000/api/v1/parse-content");
             var request = new
             {
-                type = "CSV",
-                content = csvBase64
+                Type = 10,
+                Content = csvBase64
             };
 
             try

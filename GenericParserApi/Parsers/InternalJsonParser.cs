@@ -1,10 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text.Json;
 
 namespace GenericParserApi.Parsers
 {
-    internal class InternalJsonParser
+    public class InternalJsonParser : IContentParser
     {
+        public object Parse(string content)
+        {
+            using var document = JsonDocument.Parse(content);
+
+            return document.RootElement;
+        }
     }
 }

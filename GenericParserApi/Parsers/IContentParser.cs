@@ -4,7 +4,8 @@ using System.Text;
 
 namespace GenericParserApi.Parsers
 {
-    internal class IContentParser
+    public interface IContentParser
     {
+        object Parse(string content);
     }
 }

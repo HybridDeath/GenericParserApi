@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace GenericParserApi.Models
+﻿namespace GenericParserApi.Models
 {
-    internal class ParseResponse
+    public record ParseResponse
     {
+        public ParseStatus Status { get; init; }
+        public int Count { get; init; }
+        public object Data { get; init; } = new object();
     }
 }
