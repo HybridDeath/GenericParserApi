@@ -1,16 +1,17 @@
-﻿using CsvHelper;
-using CsvHelper.Configuration;
-using System.Net.Http.Json;
-using System.Net.Mime;
+﻿using System.Net.Http.Json;
 using System.Text;
-using System.Text.Json;
 
 namespace ConsoleTester
 {
     internal class Program
     {
-        static async Task Main(string[] args)
+        static async Task Main(string[]? args)
         {
+            if (args != null && args.Length > 0)
+            {
+                Console.WriteLine("Console arguments provided but not supported.");
+            }
+
             var csv =
             """
             Imię,Wiek,Stanowisko
