@@ -15,7 +15,7 @@ namespace GenericParserApi.Services
         }
 
 
-        public object Parse(ContentType type, string content)
+        public ParserResult Parse(ContentType type, string content)
         {
             return type switch
             {
