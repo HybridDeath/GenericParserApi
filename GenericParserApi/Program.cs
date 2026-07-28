@@ -15,9 +15,18 @@ namespace GenericParserApi
             builder.Services.ConfigureHttpJsonOptions(
                 options =>
                 {
+                    // Ważna opcja, aby nie wysyłać nullable w response.
+                    options.SerializerOptions.DefaultIgnoreCondition =
+                        JsonIgnoreCondition.WhenWritingNull;
+
                     options.SerializerOptions.Converters.Add(
                         // W tym wypadku T jest ContentType. Zapewnia większą elastyczność.
                         new JsonStringEnumConverter<ContentType>()
+                    );
+
+                    options.SerializerOptions.Converters.Add(
+                        // A w tym wypadku gwarantuje lepszą serializację.
+                        new JsonStringEnumConverter<ParseStatus>()
                     );
 
                     // Można wyłączyć ale pomaga w testach.
@@ -53,12 +62,19 @@ namespace GenericParserApi
                 var parserService = new ContentParserService();
                 try
                 {
-                    var result = parserService.Parse(
+                    var parserResult = parserService.Parse(
                         request.Type,
                         decodedContent
                     );
 
-                    return Results.Ok(result);
+                    return Results.Ok(
+                        new ParseResponse
+                        {
+                            Status = ParseStatus.Success,
+                            ProcessedCount = parserResult.Count,
+                            Data = parserResult.Data
+                        }
+                    );
                 }
                 catch (CsvParseException ex)
                 {
