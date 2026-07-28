@@ -1,7 +1,9 @@
-﻿namespace GenericParserApi.Parsers
+﻿using GenericParserApi.Models;
+
+namespace GenericParserApi.Parsers
 {
     public interface IContentParser
     {
-        object Parse(string content);
+        ParserResult Parse(string content);
     }
 }
