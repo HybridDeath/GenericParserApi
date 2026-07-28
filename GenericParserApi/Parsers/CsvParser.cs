@@ -1,4 +1,8 @@
-﻿namespace GenericParserApi.Parsers
+﻿using CsvHelper;
+using GenericParserApi.Models;
+using System.Globalization;
+
+namespace GenericParserApi.Parsers
 {
     public class CsvParser : IContentParser
     {
@@ -7,63 +11,65 @@
         /// </summary>
         /// <param name="content">CSV content to be parsed.</param>
         /// <returns>A list of dictionaries representing the parsed CSV data.</returns>
-        public object Parse(string content)
+        public ParserResult Parse(string content)
         {
-            // Na początek dzielimy zawartość na linie, usuwając puste linie.
-            var lines = content
-                .Split(
-                    Environment.NewLine,
-                    StringSplitOptions.RemoveEmptyEntries
+            try
+            {
+                using var reader = new StringReader(content);
+                using var csv = new CsvReader(
+                    reader,
+                    CultureInfo.InvariantCulture
                 );
 
-            // Jeśli nie ma wystarczającej liczby linii, zwracamy ekwiwalent pustej listy z tym T.
-            if (lines.Length < 2)
-            {
-                return new List<Dictionary<string, string>>();
-            }
+                var records = new List<Dictionary<string, string>>();
 
-            // Pierwsza linia zawiera nagłówki, zwraca string[]?, musi być nullable, bo również może być pusta.
-            // Można to wykonać bez LINQ, ale to rozwiązanie jest bardziej czytelne.
-            var headers = lines[0]
-                .Split(',')
-                .Select(x => x.Trim())
-                .ToArray();
-
-            // Tworzenie samej listy wynikowej ze słownikami.
-            // Na tym etapie jest to uproszczona implementacja dynamicznego rekordu.
-            var result = new List<Dictionary<string, string>>();
-
-            // Foreach każdej linii. Trzeba uważać na 1 indeks, bo to nagłówki, a nie dane.
-            foreach (var line in lines.Skip(1))
-            {
-                // Rozdzielamy na podstawie przecinka, i zwracamy string[]?
-                var values = line
-                    .Split(',')
-                    .Select(x => x.Trim())
-                    .ToArray();
-
-                // Jeśli ilość danych w krotce nie zgadza się z ilością nagłówków, to rzucamy wyjatek.
-                // Ponieważ jest to operacja na danych, nie wykonujemy jej w walidatorze tylko tu.
-                if (values.Length != headers.Length)
+                if (!csv.Read())
                 {
                     throw new CsvParseException(
-                        $"CSV row has {values.Length} columns but expected {headers.Length}.", new($"Failed at line: {line.Trim()}")
+                        "CSV content is empty."
                     );
                 }
 
-                var row = new Dictionary<string, string>();
+                csv.ReadHeader();
 
-                // Wrzucamy do dicta, i potem do listy.
-                for (int i = 0; i < headers.Length; i++)
+                var headers = csv.HeaderRecord ??
+                    throw new CsvParseException(
+                        "CSV does not contain headers."
+                    );
+
+                while (csv.Read())
                 {
-                    row[headers[i]] = values[i];
+                    if (csv.Parser.Count != headers.Length)
+                    {
+                        throw new CsvParseException(
+                            $"CSV row contains {csv.Parser.Count} fields but expected {headers.Length}.",
+                            csv.Parser.RawRecord
+                        );
+                    }
+
+                    var row = new Dictionary<string, string>();
+
+                    foreach (var header in headers)
+                    {
+                        row[header] = csv.GetField(header) ?? string.Empty;
+                    }
+
+                    records.Add(row);
                 }
 
-                result.Add(row);
+                return new ParserResult
+                {
+                    Count = records.Count,
+                    Data = records
+                };
             }
-
-
-            return result;
+            catch (CsvHelperException ex)
+            {
+                throw new CsvParseException(
+                    "Invalid CSV format.",
+                    ex
+                );
+            }
         }
     }
 }
