@@ -1,4 +1,6 @@
-﻿using System.Net.Http.Json;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
@@ -11,10 +13,10 @@ namespace ConsoleTester
         {
             var csv =
             """
-                Imię,Wiek,Stanowisko
-                Żaneta,25,Programistka,IT
-                Adam,23,Menedżer HR
-                Paweł,32,Kierownik działu wdrażającego
+            Imię,Wiek,Stanowisko
+            Żaneta,25,Programistka
+            Adam,23,Menedżer HR
+            Paweł,32,Kierownik działu wdrażającego
             """;
 
             string csvBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(csv));
@@ -25,7 +27,7 @@ namespace ConsoleTester
             Uri localhostUri = new("http://localhost:5000/api/v1/parse-content");
             var request = new
             {
-                Type = 10,
+                Type = "CSV",
                 Content = csvBase64
             };
 
