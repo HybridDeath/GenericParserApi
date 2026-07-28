@@ -19,6 +19,8 @@ namespace GenericParserApi
                         // W tym wypadku T jest ContentType. Zapewnia większą elastyczność.
                         new JsonStringEnumConverter<ContentType>()
                     );
+
+                    // Można wyłączyć ale pomaga w testach.
                     options.SerializerOptions.WriteIndented = true;
                 }
             );
