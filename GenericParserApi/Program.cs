@@ -19,13 +19,12 @@ namespace GenericParserApi
                     options.SerializerOptions.DefaultIgnoreCondition =
                         JsonIgnoreCondition.WhenWritingNull;
 
+                    // Dwie poniższe linie są wymagane aby enumy były serializowane jako stringi w response.
                     options.SerializerOptions.Converters.Add(
-                        // W tym wypadku T jest ContentType. Zapewnia większą elastyczność.
                         new JsonStringEnumConverter<ContentType>()
                     );
 
                     options.SerializerOptions.Converters.Add(
-                        // A w tym wypadku gwarantuje lepszą serializację.
                         new JsonStringEnumConverter<ParseStatus>()
                     );
 
