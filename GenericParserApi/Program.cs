@@ -10,7 +10,11 @@ namespace GenericParserApi
     {
         public static void Main(string[] args)
         {
+            #region Builder
             var builder = WebApplication.CreateBuilder(args);
+
+            // ZALECANE: Przeniesienie konfiguracji portu do launchSettings.json
+            // Ktoś może mieć już zaprojektowaną własną architekturę testującą, w której automatycznie modyfikuje launchSettings.json pod swoje wymagania.
             builder.WebHost.UseUrls("http://localhost:5000");
             builder.Services.ConfigureHttpJsonOptions(
                 options =>
@@ -32,7 +36,9 @@ namespace GenericParserApi
                     options.SerializerOptions.WriteIndented = true;
                 }
             );
+            #endregion
 
+            #region Application
             var app = builder.Build();
             app.MapPost("/api/v1/parse-content", (ParseRequest request) =>
             {
@@ -58,7 +64,12 @@ namespace GenericParserApi
                     });
                 }
 
+                // ZALECANE: Przeniesienie new ContentParserService() do DI.
+                // Dla tego przykładu nie jest to konieczne.
+                // Ja osobiście wolałbym singleton, bo nasz ani nie trzyma stanu ani nie ma zależności.
+                // Przykładowo dla rozwiązań z wykorzystaniem baz danych, mieliśmy coś w stylu new MainService(new DatabaseService()).
                 var parserService = new ContentParserService();
+
                 try
                 {
                     var parserResult = parserService.Parse(
@@ -75,7 +86,19 @@ namespace GenericParserApi
                         }
                     );
                 }
+
+                // ZALECANA: Abstrakcja obu klas w coś typu ParseException, aby nie powtarzać kodu, i uniezależnić ich implementacje.
+                // Dla CSV jest to mało ważne, ale dla JSON pomagałoby to w czytaniu błędu.
+                // Ale mówiąc w skrócie, Program.cs nie powinien wiedzieć o istnieniu CsvParseException oraz JsonParseException, bo to już "wchodzenie piętro wyżej".
                 catch (CsvParseException ex)
+                {
+                    return Results.BadRequest(new
+                    {
+                        error = ex.Message,
+                        details = ex.InnerException?.Message
+                    });
+                }
+                catch (JsonParseException ex)
                 {
                     return Results.BadRequest(new
                     {
@@ -86,6 +109,7 @@ namespace GenericParserApi
             });
 
             app.Run();
+            #endregion
         }
     }
 }

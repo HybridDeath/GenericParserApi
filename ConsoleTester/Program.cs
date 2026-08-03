@@ -12,6 +12,7 @@ namespace ConsoleTester
                 Console.WriteLine("Console arguments provided but not supported.");
             }
 
+            #region Test CSV
             var csv =
             """
             Imię,Wiek,Stanowisko
@@ -22,14 +23,42 @@ namespace ConsoleTester
 
             string csvBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(csv));
             Console.WriteLine("Converted CSV to base64: " + csvBase64);
+            #endregion
+
+            #region Test JSON
+            var json =
+            """
+            {
+              "id":
+              "name": "Test object",
+              "active": true,
+              "metadata": {
+                "createdBy": "ConsoleTester",
+                "tags": [
+                  "test",
+                  "json",
+                  "internal"
+                ]
+              },
+              "values": [
+                10,
+                20,
+                30
+              ]
+            }
+            """;
+
+            string jsonBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+            Console.WriteLine("Converted JSON to base64: " + jsonBase64);
+            #endregion
 
             HttpClient client = new();
 
             Uri localhostUri = new("http://localhost:5000/api/v1/parse-content");
             var request = new
             {
-                Type = "CSV",
-                Content = csvBase64
+                Type = "INTERNAL_JSON",
+                Content = jsonBase64
             };
 
             try

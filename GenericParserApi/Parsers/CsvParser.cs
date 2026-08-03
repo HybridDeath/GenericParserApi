@@ -10,7 +10,7 @@ namespace GenericParserApi.Parsers
         /// Parses CSV content into a list of dictionaries, where each dictionary represents a row with column headers as keys.
         /// </summary>
         /// <param name="content">CSV content to be parsed.</param>
-        /// <returns>A list of dictionaries representing the parsed CSV data.</returns>
+        /// <returns>A ParserResult representing the count of processed CSV data and data itself.</returns>
         public ParserResult Parse(string content)
         {
             try
@@ -25,17 +25,24 @@ namespace GenericParserApi.Parsers
 
                 if (!csv.Read())
                 {
-                    throw new CsvParseException(
-                        "CSV content is empty."
-                    );
+                    throw new CsvParseException("CSV content is empty.");
                 }
 
                 csv.ReadHeader();
 
                 var headers = csv.HeaderRecord ??
-                    throw new CsvParseException(
-                        "CSV does not contain headers."
-                    );
+                    throw new CsvParseException("CSV does not contain headers.");
+
+                // Ponieważ w zdaniu testowany CSV nie został określony, dodajemy dodatkowe bloki sprawdzające.
+                if (headers.Any(string.IsNullOrWhiteSpace))
+                {
+                    throw new CsvParseException("CSV contains empty headers.");
+                }
+
+                if (headers.Length != headers.Distinct().Count())
+                {
+                    throw new CsvParseException("CSV contains duplicate headers.");
+                }
 
                 while (csv.Read())
                 {

@@ -1,4 +1,6 @@
-﻿namespace GenericParserApi.Services
+﻿using System.Text;
+
+namespace GenericParserApi.Services
 {
     public static class ContentDecoder
     {
@@ -11,7 +13,7 @@
         {
             byte[] bytes = Convert.FromBase64String(base64Content);
 
-            return System.Text.Encoding.UTF8.GetString(bytes);
+            return Encoding.UTF8.GetString(bytes);
         }
     }
 }
